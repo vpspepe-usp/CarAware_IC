@@ -6,7 +6,7 @@ from wrappers import angle_diff, vector
 #target_speed    = 20.0 # kmh
 
 
-def calculate_reward(env, reward_fn, last_reward = None, last_distance_lst = None, veh = None, veh_num = None):
+def calculate_reward(env, reward_fn, last_reward = None, last_distance_lst = None, veh = None, veh_num = None, image_lable = None):
 
     if reward_fn == "rw_distance":
         reward, distance = rw_distance(env)
@@ -33,8 +33,10 @@ def calculate_reward(env, reward_fn, last_reward = None, last_distance_lst = Non
 
     if reward_fn == "rw_exponential_distance_normalized":
         reward, distance = rw_exponential_distance_normalized(env, veh, veh_num)
-
         #reward = reward/env.ego_num (verificar se faz sentido trabalhar com a média pra vários veículos
+
+    if reward_fn == "rw_image":
+        reward = rw_image(env, image_lable)
 
     return reward, distance
 
@@ -134,8 +136,7 @@ def rw_exponential_distance_normalized(env, veh, veh_num):
         #distance_lst.append(0)
         reward = 0
         distance = 0
-
-    #total_reward = sum(reward_lst)/env.ego_num
+        #total_reward = sum(reward_lst)/env.ego_num
     return reward, distance
 
 def rw_distance_normalized(env, veh, veh_num):
@@ -162,3 +163,26 @@ def rw_distance_normalized(env, veh, veh_num):
     #total_reward = sum(reward_lst)/env.ego_num
 
     return reward, distance
+
+def rw_image(env, image_lable):
+
+    #Puxar coisas do gabarito
+    try:
+        img_prediction = 0
+        image_lable = 0
+
+        if img_prediction == 0 and image_lable == 0:
+            reward_img = 1
+        elif (img_prediction == 1 and image_lable == 2) or (img_prediction == 2 and image_lable == 1):
+            reward_img = 1
+        elif (img_prediction == 1 and image_lable == 1) or (img_prediction == 2 and image_lable == 2):
+            reward_img = 10
+        elif (img_prediction == 1 or img_prediction == 2) and image_lable == 0:
+            reward_img = -3
+        elif img_prediction == 0 and (img_prediction == 1 or img_prediction == 2):
+            reward_img = -10
+
+    except:
+        return 0
+
+    return reward_img
