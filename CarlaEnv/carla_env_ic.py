@@ -4,6 +4,7 @@ from gym.utils import seeding
 import reward_functions as reward_functions
 import math
 from wrappers import *
+from ObjectRecognizer.image_label_generator import ImageLabelGenerator
 
 class CarlaEnv(gym.Env):
     """
@@ -95,6 +96,10 @@ class CarlaEnv(gym.Env):
         self.synchronous = synchronous
         self.seed()
         self.action_length = len(self.vetor_act_low)  # será usado para remontar a matriz
+        self.quadrant_idx = 0
+        self.max_quadrants = 15
+        self.quadrants = [None]*(self.max_quadrante + 1)
+        self.image_label_gen = ImageLabelGenerator()
 
         '''
         # preenche vetor total de observação e ação
@@ -111,7 +116,7 @@ class CarlaEnv(gym.Env):
         '''
         objects_labels = {0: 'Nada', 1: 'Semaforo', 2: 'Placa'}
         self.img_shape = (40, 80, 3)
-        self.action_space = gym.spaces.MultiDiscrete([3]*8)
+        self.action_space = gym.spaces.Discrete(3)
         # 3 possibilidades para cada quadrante da imagem 
 
         self.observation_space = gym.spaces.Box(low=0, high=1, shape=self.img_shape)  
@@ -144,10 +149,7 @@ class CarlaEnv(gym.Env):
             raise Exception("CarlaEnv.step() called after the environment was closed." +
                             "Check for info[\"closed\"] == True in the learning loop.")
 
-        if action is not None:
-            veh.prediction = self.network_to_carla(action)
-
-        #simulation.ego_vehicle[current_veh].prediction = action  # salva valor para desenhar prediction no Top-View
+        
 
         # Garante que os dados são válidos para servirem de input pra rede neural
         if camera is not None:
@@ -185,66 +187,18 @@ class CarlaEnv(gym.Env):
             self.close()
             self.terminal_state = True
         """
-
+        self.quadrant_idx = (self.quadrant_idx + 1) % 16
         return self.observation, reward, self.terminal_state
 
        # Transforma a lista de listas em um vetor de X por 1
+    
 
-
-    def _get_observation(self, camera):  
-
-        #self.observation = {"GNSS": []}
-        observation = []
-        #for vehicle, idx in zip(self._simulation.ego_vehicle, range(len(self._simulation.ego_vehicle))):
-        #for vehicle in self._simulation.ego_vehicle:
-
-        # Varia input de número de veículo se estiver treinando com apenas um, para aumentar generalização
-        #if single_veh != 10:
-            #veh_idx = single_veh
-        #else:
-            #veh_idx = veh_num
-        try:
-            if veh.sens_gnss_input is not None:
-                if not self.last_positions_training:
-                    #COMPLETO
-                    observation.append([veh.sens_gnss_input.x, veh.sens_gnss_input.y, veh.sens_imu.ue_accelerometer[0],
-                                        veh.sens_imu.ue_accelerometer[1], veh.sens_imu.ue_accelerometer[2],
-                                        veh.sens_imu.ue_gyroscope[0], veh.sens_imu.ue_gyroscope[1],
-                                        veh.sens_imu.ue_gyroscope[2], veh.sens_imu.ue_compass_degrees,
-                                        veh.sens_spd_sas_speed, veh.sens_spd_sas_angle])
-                    #SMALL
-                    #observation.append([veh.sens_gnss_input.x, veh.sens_gnss_input.y, veh.sens_imu.ue_compass_degrees,
-                    #                    veh.sens_spd_sas_speed, veh.sens_spd_sas_angle])
-
-                else:  #com positions training
-                    #COMPLETO
-                    #observation.append([veh.sens_gnss_input.x, veh.sens_gnss_input.y, veh.sens_imu.ue_accelerometer[0],
-                    #                    veh.sens_imu.ue_accelerometer[1], veh.sens_imu.ue_accelerometer[2],
-                    #                    veh.sens_imu.ue_gyroscope[0], veh.sens_imu.ue_gyroscope[1],
-                    #                    veh.sens_imu.ue_gyroscope[2], veh.sens_imu.ue_compass_degrees,
-                    #                    veh.sens_spd_sas_speed, veh.sens_spd_sas_angle])
-                    # SMALL
-                    observation.append([veh.sens_gnss_input.x, veh.sens_gnss_input.y, veh.sens_imu.ue_compass_degrees,
-                                        veh.sens_spd_sas_speed, veh.sens_spd_sas_angle])
-                    positions_list = []
-                    for position_pair in veh.stacked_positions:
-                        for position in position_pair:
-                            positions_list.append(position)
-                    observation[0].extend(positions_list)
-
-            else:
-                if not self.last_positions_training:
-                    observation.append([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]])  # COMPLETO
-                    #observation.append([[0, 0, 0, 0, 0]])  # SMALL
-                else:
-                    observation.append([[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]])  # COMPLETO
-
-            # self.observation = observation
-            # print("observation: ", observation)
-            self.observation = self.carla_to_network(observation[0])
-        except:
-            #print("Falha Sensores")
-            self.observation = None
+    def _get_observation(self):
+        if self.quadrant_idx == 0:
+            image = self._simulation.ego_vehicle[0].sens_rgb_input[-1]
+            new_matrix, exists_object, _ = self.image_label_gen.create_label_matrix(self.image)
+            self.quadrants = new_matrix
+        self.observation = self.quadrants[self.quadrant_idx]
 
 
     def carla_to_network(self, data):  # comprime observação para espaço de -1 a 1

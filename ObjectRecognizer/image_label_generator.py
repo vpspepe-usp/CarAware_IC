@@ -80,12 +80,12 @@ class ImageLabelGenerator:
         return False
             
         
-    def create_label_matrix(self):# -> list[np.ndarray, bool, np.ndarray]:
+    def create_label_matrix(self, img):# -> list[np.ndarray, bool, np.ndarray]:
         img, new_matrix = self.get_image_and_create_copy_zeros_matrix()
         # Get the camera matrix 
         world_2_camera = np.array(self.camera.get_transform().get_inverse_matrix())
         objects = self.get_objects()
-        exists_object = False
+        exists_object: bool = False
         for _object in objects:
             # Filter for distance from ego vehicle
             if self.check_if_object_is_in_front_range(_object):
@@ -93,3 +93,6 @@ class ImageLabelGenerator:
                 exists_object = True
                 new_matrix = self.add_object_label_into_new_matrix(_object, world_2_camera, new_matrix)
         return new_matrix, exists_object, img
+    
+    def set_camera(self, camera):
+        self.camera = camera

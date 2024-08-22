@@ -530,7 +530,7 @@ class SimulationSetup:
             normalized_frame = frame / 255.0
 
             # Resize
-            preprocessed_frame = transform.resize(normalized_frame, [84, 84])
+            preprocessed_frame = transform.resize(normalized_frame, [160, 320])
 
             return preprocessed_frame
 
