@@ -1,5 +1,6 @@
 from camera_functions import build_projection_matrix, get_image_point
 import carla
+import queue
 import numpy as np
 from typing import List
 
@@ -16,6 +17,8 @@ class ImageLabelGenerator:
         self.K = build_projection_matrix(image_w, image_h, fov)
         self.object_labels_dict = {"Nada": 0, "TrafficLight": 1, "TrafficSigns": 2}
         self.inverse_object_labels_dict = {v: k for k, v in self.object_labels_dict.items()}
+        self.image_queue = queue.Queue(10)
+        self.camera.listen(self.image_queue.put)
         self.max_distance = max_distance
         self.min_distance = min_distance
         self.n_horizontal_splits = n_horizontal_splits
@@ -29,10 +32,11 @@ class ImageLabelGenerator:
         objects.extend(self.world.get_environment_objects(carla.CityObjectLabel.TrafficSigns))
         return objects
     
-    def create_zeros_matrix(self, image):
-        np_img = np.reshape(np.copy(image.raw_data), (image.height, image.width, 4))
+    def get_image_and_create_copy_zeros_matrix(self):
+        image = self.image_queue.get()
+        img = np.reshape(np.copy(image.raw_data), (image.height, image.width, 4))
         new_matrix = np.zeros((image.height, image.width))
-        return np_img, new_matrix
+        return img, new_matrix
     
     def get_x_y_min_max(self, world_2_camera, verts):
         p0 = get_image_point(verts[0], self.K, world_2_camera)
@@ -83,8 +87,8 @@ class ImageLabelGenerator:
         return False
 
 
-    def create_label_matrix(self, img_matrix):# -> list[np.ndarray, bool, np.ndarray]:
-        np_img, new_matrix = self.create_zeros_matrix(img_matrix)
+    def create_label_matrix(self):# -> list[np.ndarray, bool, np.ndarray]:
+        img, new_matrix = self.get_image_and_create_copy_zeros_matrix()
         # Get the camera matrix 
         world_2_camera = np.array(self.camera.get_transform().get_inverse_matrix())
         objects = self.get_objects()
@@ -95,7 +99,7 @@ class ImageLabelGenerator:
                 # Cycle through the vertices
                 exists_object = True
                 new_matrix = self.add_object_label_into_new_matrix(_object, world_2_camera, new_matrix)
-        return new_matrix, exists_object, np_img
+        return new_matrix, exists_object, img
 
 
     def create_quadrants_from_matrix(self, matrix):
@@ -116,3 +120,6 @@ class ImageLabelGenerator:
                 quadrant_percents["Nada"] = 0
                 quadrants_labels.append(self.object_labels_dict.get(max(quadrant_percents, key=quadrant_percents.get)))
         return quadrants_labels                
+
+    def set_camera(self, camera):
+        self.camera = camera

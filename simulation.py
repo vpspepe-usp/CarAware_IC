@@ -566,9 +566,15 @@ class SimulationSetup:
         # SALVA AS IMAGENS NO HD:
         # cv2.imwrite('tutorial/output/%.6d.png' % rgb.frame, image)
         # rgb.save_to_disk('tutorial/output/Sem_%.6d.jpg' % rgb.frame, carla.ColorConverter.CityScapesPalette)
+        if self.rgb_mode == "RAW":
+            image = np.array(rgb.raw_data)
+            image = image.reshape((self.im_height, self.im_width, 4))
+            image = image[:, :, :3]
+            image = np.array(image)  # esse passo é necessário para que o comando image_show funcione
+            self.ego_vehicle[veh_num].sens_rgb_data = image
 
 
-        if self.rgb_mode == "BINARY":  # MÉTODO VIA BINARIZAÇÃO (SEMÂNTICO)
+        elif self.rgb_mode == "BINARY":  # MÉTODO VIA BINARIZAÇÃO (SEMÂNTICO)
             image = np.array(rgb.raw_data)
             image = image.reshape((self.im_height, self.im_width, 4))
             image = image[:, :, :3]

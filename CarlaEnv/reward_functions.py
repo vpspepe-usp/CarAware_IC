@@ -6,7 +6,7 @@ from wrappers import angle_diff, vector
 #target_speed    = 20.0 # kmh
 
 
-def calculate_reward(env, reward_fn, last_reward = None, last_distance_lst = None, veh = None, veh_num = None, image_lable = None):
+def calculate_reward(env, reward_fn, last_reward = None, last_distance_lst = None, veh = None, veh_num = None, image_label = None, action = None):
 
     if reward_fn == "rw_distance":
         reward, distance = rw_distance(env)
@@ -36,7 +36,7 @@ def calculate_reward(env, reward_fn, last_reward = None, last_distance_lst = Non
         #reward = reward/env.ego_num (verificar se faz sentido trabalhar com a média pra vários veículos
 
     if reward_fn == "rw_image":
-        reward = rw_image(env, image_lable)
+        reward = rw_image(env, image_label, action)
 
     return reward, distance
 
@@ -164,20 +164,19 @@ def rw_distance_normalized(env, veh, veh_num):
 
     return reward, distance
 
-def rw_image(env, image_lable):
+def rw_image(env, image_label, action):
 
-    #Puxar coisas do gabarito
     try:
-        img_prediction = 0
-        image_lable = 0
+        img_prediction = action
+        image_label = env.label
 
-        if img_prediction == 0 and image_lable == 0:
+        if img_prediction == 0 and image_label == 0:
             reward_img = 1
-        elif (img_prediction == 1 and image_lable == 2) or (img_prediction == 2 and image_lable == 1):
+        elif (img_prediction == 1 and image_label == 2) or (img_prediction == 2 and image_label == 1):
             reward_img = 1
-        elif (img_prediction == 1 and image_lable == 1) or (img_prediction == 2 and image_lable == 2):
+        elif (img_prediction == 1 and image_label == 1) or (img_prediction == 2 and image_label == 2):
             reward_img = 10
-        elif (img_prediction == 1 or img_prediction == 2) and image_lable == 0:
+        elif (img_prediction == 1 or img_prediction == 2) and image_label == 0:
             reward_img = -3
         elif img_prediction == 0 and (img_prediction == 1 or img_prediction == 2):
             reward_img = -10

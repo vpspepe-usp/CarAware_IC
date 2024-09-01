@@ -99,7 +99,7 @@ class CarlaEnv(gym.Env):
         self.quadrant_idx = 0
         self.max_quadrants = 15
         self.quadrants = [None]*(self.max_quadrante + 1)
-        self.image_label_gen = ImageLabelGenerator()
+        self.image_label_gen = ImageLabelGenerator(self._simulation)
 
         '''
         # preenche vetor total de observação e ação
@@ -114,8 +114,8 @@ class CarlaEnv(gym.Env):
             action_low.extend(act_low)
             action_high.extend(act_high)
         '''
-        objects_labels = {0: 'Nada', 1: 'Semaforo', 2: 'Placa'}
-        self.img_shape = (40, 80, 3)
+        self.objects_labels = {0: 'Nada', 1: 'Semaforo', 2: 'Placa'}
+        self.img_shape = (60, 80, 3)
         self.action_space = gym.spaces.Discrete(3)
         # 3 possibilidades para cada quadrante da imagem 
 
@@ -149,8 +149,6 @@ class CarlaEnv(gym.Env):
             raise Exception("CarlaEnv.step() called after the environment was closed." +
                             "Check for info[\"closed\"] == True in the learning loop.")
 
-        
-
         # Garante que os dados são válidos para servirem de input pra rede neural
         if camera is not None:
             while True:
@@ -168,18 +166,13 @@ class CarlaEnv(gym.Env):
                         break
 
         # Call external reward fn
-        reward, self.distance = reward_functions.calculate_reward(self, self.reward_fn, self.last_reward, self.last_distance, veh, veh_num)
+        reward, self.distance = reward_functions.calculate_reward(self, self.reward_fn, self.last_reward, self.last_distance, veh, veh_num, action)
 
         self.last_reward = reward  # variável usada pra calcular a condição negativa
         self.last_distance = self.distance
         #self.total_reward += reward
         self.step_count += 1
 
-        veh.pred_distance = self.distance
-
-        #if self.distance is not None:
-        #    for vehicle,distance in zip(self._simulation.ego_vehicle,self.distance):
-        #        vehicle.pred_distance = distance
         """
         # Check for ESC press
         pygame.event.pump()
@@ -195,10 +188,12 @@ class CarlaEnv(gym.Env):
 
     def _get_observation(self):
         if self.quadrant_idx == 0:
-            image = self._simulation.ego_vehicle[0].sens_rgb_input[-1]
+            self.image = self._simulation.ego_vehicle[0].sens_rgb_input[-1]
             new_matrix, exists_object, _ = self.image_label_gen.create_label_matrix(self.image)
-            self.quadrants = new_matrix
+            self.quadrants = self.image_label_gen.create_quadrants_from_matrix(new_matrix)
+            self.quadrants_labels = self.image_label_gen.create_labels_from_quadrants(self.quadrants)
         self.observation = self.quadrants[self.quadrant_idx]
+        self.label = self.quadrants_labels[self.quadrant_idx]
 
 
     def carla_to_network(self, data):  # comprime observação para espaço de -1 a 1

@@ -123,7 +123,7 @@ HYPER_PARAMS["batch_size"] = int(2048)  # Epoch batch size - Default: 32 / 2048 
 HYPER_PARAMS["synchronous"] = False  # Set this to True when running in a synchronous environment
 HYPER_PARAMS["action_smoothing"] = float(0.0)  #Action smoothing factor
 HYPER_PARAMS["model_name"] = "PPO_MODEL_step10_moving_1agent_reset3_Town02_distnorm_noblackout_highstd_h32768_batch2048_lr8e5_epoch4_v3"  # Name of the model to train. Output written to models/model_name
-HYPER_PARAMS["reward_fn"] = "rw_distance_normalized"  # Reward Function to use. See reward_functions.py for more info.
+HYPER_PARAMS["reward_fn"] = "rw_image"  # Reward Function to use. See reward_functions.py for more info.
 HYPER_PARAMS["seed"] = 0  # Seed to use. (Note that determinism unfortunately appears to not be guaranteed
                         # with this option in our experience)
 HYPER_PARAMS["eval_interval"] = int(10)  # Number of episodes interval between evaluations - Default: 5
@@ -179,9 +179,9 @@ SENS_PARAMS["SENS_RGB"] = False
 SENS_PARAMS["SENS_RGB_PREVIEW"] = False  # Define se as imagens captadas serão desenhadas na tela
 SENS_PARAMS["SENS_RGB_SAMPLING"] = 3  # tempo em segundos entre cada aquisição
 SENS_PARAMS["SENS_RGB_STACK_SIZE"] = 4  # define o tamanho do buffer com X imagens para alimentar a RN
-SENS_PARAMS["RGB_MODE"] = "SEMANTIC"  # Valores possíveis: YOLO, BINARY, SEMANTIC
+SENS_PARAMS["RGB_MODE"] = "RAW"  # Valores possíveis: YOLO, BINARY, SEMANTIC, RAW
 SENS_PARAMS["IM_WIDTH"] = 320  # 640   160
-SENS_PARAMS["IM_HEIGHT"] = 160  # 480   80
+SENS_PARAMS["IM_HEIGHT"] = 240  # 480   80
 SENS_PARAMS["SENS_RGB_BLACKOUT"] = 0  # Tempo em segundos que o sensor ficará desabilitado a cada X períodos. 0 = blackout desativado
 SENS_PARAMS["SENS_RGB_BLACKOUT_INTERVAL"] = 10  # Tempo em segundos do intervalo de blackout
 
