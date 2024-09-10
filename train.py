@@ -16,7 +16,7 @@ from utils import compute_gae
 #from vae.models import ConvVAE, MlpVAE
 
 
-from CarlaEnv.carla_env import CarlaEnv as CarlaEnv
+from CarlaEnv.carla_env_ic import CarlaEnv as CarlaEnv
 
 
 # Converte valor da saída do modelo para valores de localização no Carla

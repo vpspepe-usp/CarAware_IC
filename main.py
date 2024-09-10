@@ -49,8 +49,8 @@ SIM_PARAMS["EPISODE_RESET"] = True  # Se True, faz o respawn aleatório a cada n
 SIM_PARAMS["RESET_INTERVAL"] = 3  # Define qual número e episódios serão rodados até realizar o reset
 SIM_PARAMS["CENTRALIZED_SPAWN"] = False  # Se True, força o spawn a acontecer no centro do mapa (Funciona apenas com Town02)
 SIM_PARAMS["SENSORS_BLACKOUT"] = False  # Se True, falha os sensores a cada X segundos, por Y segundos.
-SIM_PARAMS["MAP"] = "Town02"  # Mapa que será carregado na simulação. Ex.: Town01,Town02,Town10HD_Opt (só com ep. reset), Random,Gradual_Random
-SIM_PARAMS["RANDOM_MAPS"] = ["Town02", "Town01"]  # Mapas que serão selecionados randomicamente se MAP = "Random" ou "Gradual_Random"
+SIM_PARAMS["MAP"] = "Town01"  # Mapa que será carregado na simulação. Ex.: Town01,Town02,Town10HD_Opt (só com ep. reset), Random,Gradual_Random
+SIM_PARAMS["RANDOM_MAPS"] = ["Town01"]  # Mapas que serão selecionados randomicamente se MAP = "Random" ou "Gradual_Random"
 SIM_PARAMS["GRADUAL_RANDOM_INIT_EP_CHANGE"] = 50  # Número de episódios que irá rodar no início, antes de trocar o mapa
 SIM_PARAMS["GRADUAL_RANDOM_RATE"] = 0  # Tamanho do passo de redução do número de episódios que irá rodar antes de trocar o mapa
 SIM_PARAMS["KALMAN_FILTER"] = False  # Generates kalman filter outputs to compare with the prediction, during "Play" and evaluation in "Training"

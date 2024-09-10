@@ -95,10 +95,9 @@ class CarlaEnv(gym.Env):
         # Setup gym environment
         self.synchronous = synchronous
         self.seed()
-        self.action_length = len(self.vetor_act_low)  # será usado para remontar a matriz
         self.quadrant_idx = 0
         self.max_quadrants = 15
-        self.quadrants = [None]*(self.max_quadrante + 1)
+        self.quadrants = [None]*(self.max_quadrants + 1)
         self.image_label_gen = ImageLabelGenerator(self._simulation)
 
         '''

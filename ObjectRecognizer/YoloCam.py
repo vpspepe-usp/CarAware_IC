@@ -21,7 +21,7 @@ while True:
     try:
         user_entry = input("Press ENTER to start: \n")
         client = carla.Client('localhost', 2000)
-        client.set_timeout(50)
+        client.set_timeout(60)
         world = client.load_world('Town01')
         break
     except Exception as e:
@@ -60,7 +60,7 @@ vehicle.set_autopilot(True)
 # # Set up the simulator in synchronous mode
 settings = world.get_settings()
 settings.synchronous_mode = True # Enables synchronous mode
-settings.fixed_delta_seconds = 0.05
+settings.fixed_delta_seconds = 0.25
 world.apply_settings(settings)
 img_label_gen = ImageLabelGenerator(camera, world, 15, 5)
 img_dequeue = deque([], maxlen=5)

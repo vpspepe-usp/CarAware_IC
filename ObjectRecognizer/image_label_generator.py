@@ -1,3 +1,4 @@
+from functools import cached_property
 from camera_functions import build_projection_matrix, get_image_point
 import carla
 import numpy as np
@@ -115,4 +116,5 @@ class ImageLabelGenerator:
             else:
                 quadrant_percents["Nada"] = 0
                 quadrants_labels.append(self.object_labels_dict.get(max(quadrant_percents, key=quadrant_percents.get)))
-        return quadrants_labels                
+        return quadrants_labels
+    

@@ -9,7 +9,7 @@ from ppo import PPO
 from run_eval import run_eval
 
 
-from CarlaEnv.carla_env import CarlaEnv as CarlaEnv
+from CarlaEnv.carla_env_ic import CarlaEnv as CarlaEnv
 
 
 def play(hyper_params, sim_params, simulation, top_view):  # start_carla=True
