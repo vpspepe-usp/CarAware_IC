@@ -15,7 +15,7 @@ class PolicyGraph():
         Manages the policy computation graph
     """
 
-    def __init__(self, input_states, taken_actions, action_space, scope_name,
+    def __init__(self, input_states, taken_actions, num_actions, scope_name,
                  initial_std=0.4, initial_mean_factor=0.1,
                  pi_hidden_sizes=(500, 300), vf_hidden_sizes=(500, 300)):
         """
@@ -37,7 +37,7 @@ class PolicyGraph():
                 List of layer sizes used to construct value predicting MLP
         """
 
-        num_actions, action_min, action_max = action_space.shape[0], action_space.low, action_space.high  #len(action_space)+1
+        #num_actions, action_min, action_max = action_space.shape[0], action_space.low, action_space.high  #len(action_space)+1
 
         with tf.variable_scope(scope_name):
             # Policy branch π(a_t | s_t; θ)
@@ -47,7 +47,7 @@ class PolicyGraph():
                                                activation=tf.nn.tanh,  # tf.nn.softmax
                                                kernel_initializer=tf.initializers.variance_scaling(scale=initial_mean_factor),
                                                name="action_mean")
-            self.action_mean = action_min + ((self.action_mean + 1) / 2) * (action_max - action_min)
+            #self.action_mean = action_min + ((self.action_mean + 1) / 2) * (action_max - action_min)
             self.action_logstd = tf.Variable(np.full((num_actions), np.log(initial_std), dtype=np.float32), name="action_logstd")
 
             # Value branch V(s_t; θ)
@@ -73,7 +73,7 @@ class PPO():
         Proximal policy gradient model class
     """
 
-    def __init__(self, input_shape, action_space,
+    def __init__(self, input_shape, num_actions,
                  learning_rate=3e-4, lr_decay=0.998, epsilon=0.2,
                  value_scale=0.5, entropy_scale=0.01, initial_std=0.4,
                  model_dir="./"):
@@ -98,7 +98,7 @@ class PPO():
                 Directory to output the trained model and log files
         """
         
-        num_actions = action_space.shape[0]
+        #num_actions = action_space.shape[0]
         #num_actions = len(action_space)  # Define quantas ações serão geradas pela RN
         self.current_std = 0
 
@@ -114,8 +114,8 @@ class PPO():
         self.advantage = tf.compat.v1.placeholder(shape=(None,), dtype=tf.float32, name="advantage_placeholder")
 
         # Create policy graphs
-        self.policy        = PolicyGraph(self.input_states, self.taken_actions, action_space, "policy", initial_std=initial_std)
-        self.policy_old    = PolicyGraph(self.input_states, self.taken_actions, action_space, "policy_old", initial_std=initial_std)
+        self.policy        = PolicyGraph(self.input_states, self.taken_actions, num_actions, "policy", initial_std=initial_std)
+        self.policy_old    = PolicyGraph(self.input_states, self.taken_actions, num_actions, "policy_old", initial_std=initial_std)
 
         # Calculate ratio:
         # r_t(θ) = exp( log   π(a_t | s_t; θ) - log π(a_t | s_t; θ_old)   )

@@ -108,15 +108,15 @@ def train(hyper_params, sim_params, simulation, top_view):  # start_carla=True
     best_eval_reward = -float("inf")
 
     # Environment constants
-    input_shape = env.observation_space.shape[0]
-    num_actions = env.action_space.shape[0]
+    input_shape = env.observation_space.shape
+    num_actions = env.action_shape[0]
 
     #input_shape = env.observation_space["GNSS"].shape[0] + 1  # input_shape = np.array([vae.z_dim + len(measurements_to_include)])
     #num_actions = env.action_space["Obj_Coord"].shape[0] + 1 # antes era +1
 
     # Create model
     print("Creating model")
-    model = PPO(input_shape, env.action_space,
+    model = PPO(input_shape, num_actions,
                 learning_rate=learning_rate, lr_decay=lr_decay,
                 epsilon=ppo_epsilon, initial_std=initial_std,
                 value_scale=value_scale, entropy_scale=entropy_scale,

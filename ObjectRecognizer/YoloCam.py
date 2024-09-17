@@ -62,7 +62,9 @@ settings = world.get_settings()
 settings.synchronous_mode = True # Enables synchronous mode
 settings.fixed_delta_seconds = 0.25
 world.apply_settings(settings)
-img_label_gen = ImageLabelGenerator(camera, world, 15, 5)
+img_label_gen = ImageLabelGenerator(15, 5)
+img_label_gen.set_camera(camera)
+img_label_gen.set_world(world)
 img_dequeue = deque([], maxlen=5)
 camera.listen(img_dequeue.append)
 while True:

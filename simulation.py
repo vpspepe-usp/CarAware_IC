@@ -1108,6 +1108,22 @@ class SimulationSetup:
             self.spawn_props(props_num)
         # registra os eventos em formato de log
         print("Criado(s) %s obstáculo(s)" % self.static_props_num)
+    
+    def get_camera(self):
+        veh_id = self.ego_vehicle[-1].id
+        for actor in list(self.world.get_actors()):
+            if actor.parent != None:
+                if actor.parent.id == veh_id:
+                    camera = actor
+                    break
+        print("CAMERA")
+        print(camera)
+        return camera
+        
+    def get_world(self):
+        print("WORLD")
+        print(self.world)
+        return self.world
 
 # CLASSE USADA PARA IMPLEMENTAR O SENSOR DE "DIREÇÃO"
 class Speed_SAS_Sensor(object):
@@ -1268,3 +1284,4 @@ class TopView(object):
             self.world.ground_truth(self.display, _all_veh, self.last_positions_training)
 
             pygame.display.flip()
+    

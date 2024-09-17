@@ -98,7 +98,7 @@ class CarlaEnv(gym.Env):
         self.quadrant_idx = 0
         self.max_quadrants = 15
         self.quadrants = [None]*(self.max_quadrants + 1)
-        self.image_label_gen = ImageLabelGenerator(self._simulation)
+        self.image_label_gen = ImageLabelGenerator()
 
         '''
         # preenche vetor total de observação e ação
@@ -116,6 +116,7 @@ class CarlaEnv(gym.Env):
         self.objects_labels = {0: 'Nada', 1: 'Semaforo', 2: 'Placa'}
         self.img_shape = (60, 80, 3)
         self.action_space = gym.spaces.Discrete(3)
+        self.action_shape = [3]
         # 3 possibilidades para cada quadrante da imagem 
 
         self.observation_space = gym.spaces.Box(low=0, high=1, shape=self.img_shape)  
@@ -132,7 +133,7 @@ class CarlaEnv(gym.Env):
         return [seed]
 
     def reset(self, is_training=True):
-
+        self.camera_and_world_are_setted = False
         self.terminal_state = False  # Set to True when we want to end episode
         self.closed = False         # Set to True when ESC is pressed
         self.start_t = time.time()
@@ -144,6 +145,12 @@ class CarlaEnv(gym.Env):
         #self.step(None)[0]
 
     def step(self, action, camera=None):  # , single_veh = 10)
+        if not self.camera_and_world_are_setted:
+            camera = self._simulation.get_camera()
+            world = self._simulation.get_world()     
+            self.image_label_gen.set_camera(camera)
+            self.image_label_gen.set_world(world)
+            
         if self.closed:
             raise Exception("CarlaEnv.step() called after the environment was closed." +
                             "Check for info[\"closed\"] == True in the learning loop.")
@@ -220,4 +227,6 @@ class CarlaEnv(gym.Env):
             # flattened_data.append((data_sens+norm_factor)/range_data)
 
         return carla_data
+    
+    
 

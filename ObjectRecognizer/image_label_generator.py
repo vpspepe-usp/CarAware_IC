@@ -1,30 +1,18 @@
-from functools import cached_property
-from camera_functions import build_projection_matrix, get_image_point
+from ObjectRecognizer.camera_functions import build_projection_matrix, get_image_point
 import carla
 import numpy as np
 from typing import List
 
 class ImageLabelGenerator:
-    def __init__(self, camera, world, max_distance = 10,
+    def __init__(self, max_distance = 10,
                 min_distance = 4.5, n_horizontal_splits = 4, n_vertical_splits = 4):
-        self.camera = camera 
-        self.world = world
-        # Get the attributes from the camera
-        image_w = int(camera.attributes.get("image_size_x"))
-        image_h = int(camera.attributes.get("image_size_y"))
-        fov = float(camera.attributes.get("fov"))
-        # Calculate the camera projection matrix to project from 3D -> 2D
-        self.K = build_projection_matrix(image_w, image_h, fov)
         self.object_labels_dict = {"Nada": 0, "TrafficLight": 1, "TrafficSigns": 2}
         self.inverse_object_labels_dict = {v: k for k, v in self.object_labels_dict.items()}
         self.max_distance = max_distance
         self.min_distance = min_distance
         self.n_horizontal_splits = n_horizontal_splits
         self.n_vertical_splits = n_vertical_splits
-        self.quadrant_width = int(image_w/n_horizontal_splits)
-        self.quadrant_heigth = int(image_h/n_vertical_splits)
-        self.n_pixels_per_quadrant = int(image_w * image_h / (n_horizontal_splits * n_vertical_splits))
-        
+
     def get_objects(self):
         objects = self.world.get_environment_objects(carla.CityObjectLabel.TrafficLight)
         objects.extend(self.world.get_environment_objects(carla.CityObjectLabel.TrafficSigns))
@@ -101,7 +89,8 @@ class ImageLabelGenerator:
 
     def create_quadrants_from_matrix(self, matrix):
         quads = [matrix[self.quadrant_heigth*i:self.quadrant_heigth*(1 + i),
-                        self.quadrant_width*j:self.quadrant_width*(1 + j)] for i in range(self.n_vertical_splits) for j in range(self.n_horizontal_splits)]
+                        self.quadrant_width*j:self.quadrant_width*(1 + j)] 
+                for i in range(self.n_vertical_splits) for j in range(self.n_horizontal_splits)]
         return quads
     
     def create_labels_from_quadrants(self, quadrants):
@@ -118,3 +107,18 @@ class ImageLabelGenerator:
                 quadrants_labels.append(self.object_labels_dict.get(max(quadrant_percents, key=quadrant_percents.get)))
         return quadrants_labels
     
+    def set_camera(self, camera):
+        self.camera = camera 
+        # Get the attributes from the camera
+        image_w = int(camera.attributes.get("image_size_x"))
+        image_h = int(camera.attributes.get("image_size_y"))
+        fov = float(camera.attributes.get("fov"))
+        # Calculate the camera projection matrix to project from 3D -> 2D
+        self.K = build_projection_matrix(image_w, image_h, fov)
+        self.quadrant_width = int(image_w/self.n_horizontal_splits)
+        self.quadrant_heigth = int(image_h/self.n_vertical_splits)
+        self.n_pixels_per_quadrant = int(image_w * image_h / (self.n_horizontal_splits * self.n_vertical_splits))
+    
+    def set_world(self, world):
+        self.world = world
+        
