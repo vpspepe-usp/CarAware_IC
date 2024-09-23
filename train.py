@@ -61,7 +61,7 @@ def train(hyper_params, sim_params, simulation, top_view):  # start_carla=True
 
     # Set seeds
     if isinstance(seed, int):
-        tf.random.set_seed(seed)
+        #tf.random.set_seed(seed)
         np.random.seed(seed)
         random.seed(0)
 
@@ -303,7 +303,7 @@ def train(hyper_params, sim_params, simulation, top_view):  # start_carla=True
                 # Perform action
                 #new_state_lst, reward_lst, terminal_state_lst = [], [], []
                 #for action, vehicle, veh_num in zip(action_lst,simulation.ego_vehicle, enumerate(simulation.ego_vehicle)):  # Roda N vezes, para N veículos simulados
-                new_state, reward, terminal_state = env.step(action, simulation.ego_vehicle[current_veh], current_veh)  # , single_veh)
+                new_state, reward, terminal_state = env.step(action)  # , single_veh)
                 #new_state_lst.append(new_state)
                 #reward_lst.append(reward)
                 #terminal_state_lst.append(terminal_state)
@@ -332,11 +332,11 @@ def train(hyper_params, sim_params, simulation, top_view):  # start_carla=True
                 # Acrescenta Reward instantâneo no HUD
                 simulation.reward_inst = total_reward
 
-                # Lógica para voltar a ciclagem de treinamento para o primeiro veículo
-                if current_veh == ego_num-1:
-                    current_veh = 0
-                else:
-                    current_veh += 1
+                # # Lógica para voltar a ciclagem de treinamento para o primeiro veículo
+                # if current_veh == ego_num-1:
+                #     current_veh = 0
+                # else:
+                #     current_veh += 1
 
                 if terminal_state:
                     break
@@ -366,15 +366,15 @@ def train(hyper_params, sim_params, simulation, top_view):  # start_carla=True
             advantages    = np.array(advantages)
 
             T = len(rewards)
-            #print("T: ", T)
-            #print("states shape: ",states.shape)
-            #print("input_shape: ", input_shape)  #*input_shape
-            #print("input shape: ", input_shape)
-            #print("taken actions: ", taken_actions.shape)
-            #print("num actions: ", num_actions)
-            #print("taken actions: ", taken_actions)
+            # print("T: ", T)
+            # print("states shape: ",states.shape)
+            # print("input_shape: ", input_shape)  #*input_shape
+            # print("input shape: ", input_shape)
+            # print("taken actions: ", taken_actions.shape)
+            # print("num actions: ", num_actions)
+            # print("taken actions: ", taken_actions)
 
-            assert states.shape == (T, input_shape)  # assert states.shape == (T, *input_shape)
+            assert states.shape == (T, *input_shape)  # assert states.shape == (T, *input_shape)
             assert taken_actions.shape == (T, num_actions)
             assert returns.shape == (T,)
             assert advantages.shape == (T,)

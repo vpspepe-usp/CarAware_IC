@@ -27,10 +27,12 @@ class VideoRecorder():
     def __del__(self):
         self.release()
 
-def build_mlp(x, hidden_sizes=(32,), activation=tf.tanh, output_activation=None):
+def build_mlp(x, hidden_sizes=(32,), activation=tf.tanh, output_activation=None, flatten = False):
+    x = x if not flatten else tf.layers.flatten(x)
     for h in hidden_sizes[:-1]:
         x = tf.layers.dense(x, units=h, activation=activation)
-    return tf.layers.dense(x, units=hidden_sizes[-1], activation=output_activation)
+    x = tf.layers.dense(x, units=hidden_sizes[-1], activation=output_activation)
+    return x
 
 def create_counter_variable(name):
     counter = types.SimpleNamespace()

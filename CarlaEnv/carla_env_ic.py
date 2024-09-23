@@ -114,9 +114,9 @@ class CarlaEnv(gym.Env):
             action_high.extend(act_high)
         '''
         self.objects_labels = {0: 'Nada', 1: 'Semaforo', 2: 'Placa'}
-        self.img_shape = (60, 80, 3)
+        self.img_shape = (60, 80, 4,)
         self.action_space = gym.spaces.Discrete(3)
-        self.action_shape = [3]
+        self.action_shape = (3,)
         # 3 possibilidades para cada quadrante da imagem 
 
         self.observation_space = gym.spaces.Box(low=0, high=1, shape=self.img_shape)  
@@ -144,35 +144,36 @@ class CarlaEnv(gym.Env):
         return initial_state, self.terminal_state, initial_reward
         #self.step(None)[0]
 
-    def step(self, action, camera=None):  # , single_veh = 10)
+    def step(self, action):  # , single_veh = 10)
         if not self.camera_and_world_are_setted:
-            camera = self._simulation.get_camera()
+            camera, im_width, im_height, im_fov = self._simulation.get_camera_and_attributes()
             world = self._simulation.get_world()     
-            self.image_label_gen.set_camera(camera)
+            self.image_label_gen.set_camera(camera, im_width, im_height, im_fov)
             self.image_label_gen.set_world(world)
+            self.camera_and_world_are_setted = True
             
         if self.closed:
             raise Exception("CarlaEnv.step() called after the environment was closed." +
                             "Check for info[\"closed\"] == True in the learning loop.")
 
         # Garante que os dados são válidos para servirem de input pra rede neural
-        if camera is not None:
-            while True:
-                input_invalido = 0
-                self._get_observation(camera)  # get most recent observations  - , single_veh)
-                if self.observation is None:
-                    input_invalido +=1
-                else:
-                    for obs in self.observation:
-                        if obs is None or math.isnan(obs):
-                            input_invalido += 1
-                            #print("Input Invalido")
-                            break
-                    if input_invalido == 0:
+        # if camera is not None:
+        while True:
+            input_invalido = 0
+            self._get_observation()  # get most recent observations  - , single_veh)
+            if self.observation is None:
+                input_invalido +=1
+            else:
+                for obs in self.observation:
+                    if obs is None:
+                        input_invalido += 1
+                        #print("Input Invalido")
                         break
+                if input_invalido == 0:
+                    break
 
         # Call external reward fn
-        reward, self.distance = reward_functions.calculate_reward(self, self.reward_fn, self.last_reward, self.last_distance, veh, veh_num, action)
+        reward, self.distance = reward_functions.calculate_reward(self, self.reward_fn, self.last_reward, action=action)
 
         self.last_reward = reward  # variável usada pra calcular a condição negativa
         self.last_distance = self.distance
@@ -194,11 +195,21 @@ class CarlaEnv(gym.Env):
 
     def _get_observation(self):
         if self.quadrant_idx == 0:
-            self.image = self._simulation.ego_vehicle[0].sens_rgb_input[-1]
-            new_matrix, exists_object, _ = self.image_label_gen.create_label_matrix(self.image)
+            while True:
+                try: # Pode ser que o veículo ainda não tenha coletado imagem, principalmente no inicio
+                    self.image = self._simulation.ego_vehicle[0].sens_rgb
+                    if self.image != None:
+                        new_matrix, exists_object, np_img = self.image_label_gen.create_label_matrix(self.image)
+                        break
+                except: # Caso ainda não haja a imagem, preenche tudo com zero
+                    time.sleep(1.0)
+                    # _, width, height, fov = self.image_label_gen.get_camera_and_attributes()
+                    # self.image = np.zeros((height, width, 3))
+                    # new_matrix, exists_object = np.zeros((height, width))
             self.quadrants = self.image_label_gen.create_quadrants_from_matrix(new_matrix)
             self.quadrants_labels = self.image_label_gen.create_labels_from_quadrants(self.quadrants)
-        self.observation = self.quadrants[self.quadrant_idx]
+            self.img_quadrants = self.image_label_gen.create_quadrants_from_matrix(np_img)
+        self.observation = self.img_quadrants[self.quadrant_idx]
         self.label = self.quadrants_labels[self.quadrant_idx]
 
 

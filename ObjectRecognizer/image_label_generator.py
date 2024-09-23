@@ -107,18 +107,21 @@ class ImageLabelGenerator:
                 quadrants_labels.append(self.object_labels_dict.get(max(quadrant_percents, key=quadrant_percents.get)))
         return quadrants_labels
     
-    def set_camera(self, camera):
+    def set_camera(self, camera, im_width, im_height, im_fov):
         self.camera = camera 
         # Get the attributes from the camera
-        image_w = int(camera.attributes.get("image_size_x"))
-        image_h = int(camera.attributes.get("image_size_y"))
-        fov = float(camera.attributes.get("fov"))
+        self.image_w = int(im_width)
+        self.image_h = int(im_height)
+        self.fov = float(im_fov)
         # Calculate the camera projection matrix to project from 3D -> 2D
-        self.K = build_projection_matrix(image_w, image_h, fov)
-        self.quadrant_width = int(image_w/self.n_horizontal_splits)
-        self.quadrant_heigth = int(image_h/self.n_vertical_splits)
-        self.n_pixels_per_quadrant = int(image_w * image_h / (self.n_horizontal_splits * self.n_vertical_splits))
+        self.K = build_projection_matrix(self.image_w, self.image_h, self.fov)
+        self.quadrant_width = int(self.image_w/self.n_horizontal_splits)
+        self.quadrant_heigth = int(self.image_h/self.n_vertical_splits)
+        self.n_pixels_per_quadrant = int(self.image_w * self.image_h / (self.n_horizontal_splits * self.n_vertical_splits))
     
     def set_world(self, world):
         self.world = world
+
+    def get_camera_and_attributes(self):
+        return self.camera, self.image_w, self.image_h, self.fov
         

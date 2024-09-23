@@ -56,6 +56,7 @@ class SimulationSetup:
         self.sens_lidar = sens_params["SENS_LIDAR"]
         self.im_height = sens_params["IM_HEIGHT"]
         self.im_width = sens_params["IM_WIDTH"]
+        self.im_fov = sens_params["FOV"]
         self.yolo_colors = sens_params["YOLO_COLORS"]
         self.sens_gnss_sampling = sens_params["SENS_GNSS_SAMPLING"]
         self.sens_gnss_preview = sens_params["SENS_GNSS_PREVIEW"]
@@ -100,7 +101,7 @@ class SimulationSetup:
 
         # INICIANDO AMBIENTE DE SIMULAÇÃO
         self.client = carla.Client("localhost", 2000)
-        self.client.set_timeout(200.0)
+        self.client.set_timeout(100.0)
         self.world = self.client.get_world()
 
         # DEFINE COMANDOS BASE PARA FAZER O SPAWN DOS ATORES DA SIMULAÇÃO
@@ -1038,7 +1039,7 @@ class SimulationSetup:
                     cam_bp = self.world.get_blueprint_library().find('sensor.camera.semantic_segmentation')
                 cam_bp.set_attribute("image_size_x", str(self.im_width))
                 cam_bp.set_attribute("image_size_y", str(self.im_height))
-                cam_bp.set_attribute("fov", str(105))
+                cam_bp.set_attribute("fov", str(self.im_fov))
                 cam_bp.set_attribute("sensor_tick", str(self.sens_rgb_sampling))  # Default 3s
                 cam_location = carla.Location(3, 0, 1)  #(3,0,1)
                 cam_rotation = carla.Rotation(0, 0, 0)  # (0, 180, 0)
@@ -1109,7 +1110,8 @@ class SimulationSetup:
         # registra os eventos em formato de log
         print("Criado(s) %s obstáculo(s)" % self.static_props_num)
     
-    def get_camera(self):
+    def get_camera_and_attributes(self):
+        """Returns camera, image_width and image_height (in pixels)"""
         veh_id = self.ego_vehicle[-1].id
         for actor in list(self.world.get_actors()):
             if actor.parent != None:
@@ -1118,7 +1120,7 @@ class SimulationSetup:
                     break
         print("CAMERA")
         print(camera)
-        return camera
+        return camera, self.im_width, self.im_height, self.im_fov
         
     def get_world(self):
         print("WORLD")

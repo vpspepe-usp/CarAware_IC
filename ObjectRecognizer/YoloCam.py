@@ -20,7 +20,7 @@ os.startfile("""C:\carla\CarlaUE4_Low""")
 while True:
     try:
         user_entry = input("Press ENTER to start: \n")
-        client = carla.Client('localhost', 2000)
+        client = carla.Client('localhost', 2001)
         client.set_timeout(60)
         world = client.load_world('Town01')
         break

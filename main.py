@@ -116,17 +116,17 @@ HYPER_PARAMS["initial_std"] = float(0.7)  # Initial value of the std used in the
 HYPER_PARAMS["target_std"] = int(0.4)  # Target de desvio padrão, utilizado para finalizar treinamento quando atingido - NÃO ESTÁ FUNCIONANDO
 HYPER_PARAMS["value_scale"] = float(1.0)  # Value loss scale factor
 HYPER_PARAMS["entropy_scale"] = float(0.01)  # Entropy loss scale factor - Default: 0.01
-HYPER_PARAMS["horizon"] = int(32768)  # Number of steps to simulate per training step - Default: 128 / 32768 (funcionou)
-HYPER_PARAMS["num_training"] = int(1)  # Number of times the model will be trained per episode
-HYPER_PARAMS["num_epochs"] = int(4)  # Number of PPO training epochs per traning step - Default: 3 (funcionou) / 4
-HYPER_PARAMS["batch_size"] = int(2048)  # Epoch batch size - Default: 32 / 2048 (funcionou) / 8192
-HYPER_PARAMS["synchronous"] = False  # Set this to True when running in a synchronous environment
+HYPER_PARAMS["horizon"] = int(128)  # Number of steps to simulate per training step - Default: 128 / 32768 (funcionou)
+HYPER_PARAMS["num_training"] = int(5)  # Number of times the model will be trained per episode
+HYPER_PARAMS["num_epochs"] = int(3)  # Number of PPO training epochs per traning step - Default: 3 (funcionou) / 4
+HYPER_PARAMS["batch_size"] = int(32)  # Epoch batch size - Default: 32 / 2048 (funcionou) / 8192
+HYPER_PARAMS["synchronous"] = False  # Setthis to True when running in a synchronous environment
 HYPER_PARAMS["action_smoothing"] = float(0.0)  #Action smoothing factor
 HYPER_PARAMS["model_name"] = "PPO_MODEL_step10_moving_1agent_reset3_Town02_distnorm_noblackout_highstd_h32768_batch2048_lr8e5_epoch4_v3"  # Name of the model to train. Output written to models/model_name
 HYPER_PARAMS["reward_fn"] = "rw_image"  # Reward Function to use. See reward_functions.py for more info.
 HYPER_PARAMS["seed"] = 0  # Seed to use. (Note that determinism unfortunately appears to not be guaranteed
                         # with this option in our experience)
-HYPER_PARAMS["eval_interval"] = int(10)  # Number of episodes interval between evaluations - Default: 5
+HYPER_PARAMS["eval_interval"] = int(3)  # Number of episodes interval between evaluations - Default: 5
 #HYPER_PARAMS["save_eval_interval"] = int(10)  # Number of evaluations interval for saving (in addition to best rw)
 HYPER_PARAMS["eval_time"] = int(40)  # Tempo que a simulação irá rodar para avaliação - Default: 60
 HYPER_PARAMS["record_eval"] = True  # If True, save' videos of evaluation episodes to models/model_name/videos/
@@ -135,7 +135,7 @@ HYPER_PARAMS["record_eval"] = True  # If True, save' videos of evaluation episod
 # =========== CONFIGURAÇÃO DOS SENSORES ( HABILITAÇÃO É True ou False) ============================
 SENS_PARAMS = {}
 # SPEED AND STEERING ANGLE SENSOR (SPD_SAS) - Funciona apenas com carro em movimento
-SENS_PARAMS["SENS_SPD_SAS"] = True
+SENS_PARAMS["SENS_SPD_SAS"] = False
 SENS_PARAMS["SENS_SPD_SAS_SAMPLING"] = 0.1  # tempo em segundos entre cada aquisição
 SENS_PARAMS["SENS_SPD_SAS_ERROR"] = 0.01  # Default: 0.001
 SENS_PARAMS["SENS_SPD_SAS_BLACKOUT_ON"] = False  # Habilita/desabilita blackout desse sensor
@@ -145,7 +145,7 @@ SENS_PARAMS["SENS_SPD_SAS_BLACKOUT_INTERVAL_MIN"] = 5  # Tempo em segundos do in
 SENS_PARAMS["SENS_SPD_SAS_BLACKOUT_INTERVAL_MAX"] = 10
 
 # GLOBAL NAVIGATION SATELLITE SYSTEM (GNSS)
-SENS_PARAMS["SENS_GNSS"] = True
+SENS_PARAMS["SENS_GNSS"] = False
 SENS_PARAMS["SENS_GNSS_PREVIEW"] = True  # Define se os pontos detectados serão desenhados na tela
 SENS_PARAMS["SENS_GNSS_SAMPLING"] = 0.1 # tempo em segundos entre cada aquisição - Default: 0.1 / Real: 1
 SENS_PARAMS["SENS_GNSS_ERROR"] = 0.00005  # Default: Low = 0.00001 / High = 0.0001
@@ -157,7 +157,7 @@ SENS_PARAMS["SENS_GNSS_BLACKOUT_INTERVAL_MIN"] = 5  # Tempo em segundos do inter
 SENS_PARAMS["SENS_GNSS_BLACKOUT_INTERVAL_MAX"] = 10
 
 # INERTIAL MEASUREMENT UNIT (IMU)
-SENS_PARAMS["SENS_IMU"] = True
+SENS_PARAMS["SENS_IMU"] = False
 SENS_PARAMS["SENS_IMU_SAMPLING"] = 0.1  # tempo em segundos entre cada aquisição - Default: 0.1 / Real: 0.01
 SENS_PARAMS["SENS_IMU_ACCEL_ERROR"] = 0.001  # Default: 0.00001
 SENS_PARAMS["SENS_IMU_GYRO_ERROR"] = 0.001  # Default: 0.00001
@@ -169,19 +169,20 @@ SENS_PARAMS["SENS_IMU_BLACKOUT_INTERVAL_MIN"] = 5  # Tempo em segundos do interv
 SENS_PARAMS["SENS_IMU_BLACKOUT_INTERVAL_MAX"] = 10
 
 # COLLISION DETECTION (COL)  # Resets the episode if there is a collision and the vehicle stops
-SENS_PARAMS["SENS_COL"] = True
+SENS_PARAMS["SENS_COL"] = False
 
 # OBSTACLE DETECTION (OBS)
 SENS_PARAMS["SENS_OBS"] = False
 
 # CAMERA DE VÍDEO A CORES (RGB)
-SENS_PARAMS["SENS_RGB"] = False
+SENS_PARAMS["SENS_RGB"] = True
 SENS_PARAMS["SENS_RGB_PREVIEW"] = False  # Define se as imagens captadas serão desenhadas na tela
 SENS_PARAMS["SENS_RGB_SAMPLING"] = 3  # tempo em segundos entre cada aquisição
 SENS_PARAMS["SENS_RGB_STACK_SIZE"] = 4  # define o tamanho do buffer com X imagens para alimentar a RN
 SENS_PARAMS["RGB_MODE"] = "RAW"  # Valores possíveis: YOLO, BINARY, SEMANTIC, RAW
 SENS_PARAMS["IM_WIDTH"] = 320  # 640   160
 SENS_PARAMS["IM_HEIGHT"] = 240  # 480   80
+SENS_PARAMS["FOV"] = 105
 SENS_PARAMS["SENS_RGB_BLACKOUT"] = 0  # Tempo em segundos que o sensor ficará desabilitado a cada X períodos. 0 = blackout desativado
 SENS_PARAMS["SENS_RGB_BLACKOUT_INTERVAL"] = 10  # Tempo em segundos do intervalo de blackout
 

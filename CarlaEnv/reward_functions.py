@@ -36,7 +36,8 @@ def calculate_reward(env, reward_fn, last_reward = None, last_distance_lst = Non
         #reward = reward/env.ego_num (verificar se faz sentido trabalhar com a média pra vários veículos
 
     if reward_fn == "rw_image":
-        reward = rw_image(env, image_label, action)
+        reward = rw_image(env, action)
+        distance = None
 
     return reward, distance
 
@@ -164,10 +165,10 @@ def rw_distance_normalized(env, veh, veh_num):
 
     return reward, distance
 
-def rw_image(env, image_label, action):
+def rw_image(env, action):
 
     try:
-        img_prediction = action
+        img_prediction = np.argmax(action)
         image_label = env.label
 
         if img_prediction == 0 and image_label == 0:
@@ -178,8 +179,10 @@ def rw_image(env, image_label, action):
             reward_img = 10
         elif (img_prediction == 1 or img_prediction == 2) and image_label == 0:
             reward_img = -3
-        elif img_prediction == 0 and (img_prediction == 1 or img_prediction == 2):
+        elif img_label == 0 and (img_prediction == 1 or img_prediction == 2):
             reward_img = -10
+        else:
+            reward_img = 0
 
     except:
         return 0

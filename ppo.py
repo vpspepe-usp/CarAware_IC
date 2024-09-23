@@ -42,7 +42,7 @@ class PolicyGraph():
         with tf.variable_scope(scope_name):
             # Policy branch π(a_t | s_t; θ)
             self.pi = build_mlp(input_states, hidden_sizes=pi_hidden_sizes, activation=tf.nn.relu,
-                                output_activation=tf.nn.tanh)  # tf.nn.softmax
+                                output_activation=tf.nn.tanh, flatten=True)  # tf.nn.softmax
             self.action_mean = tf.layers.dense(self.pi, num_actions,
                                                activation=tf.nn.tanh,  # tf.nn.softmax
                                                kernel_initializer=tf.initializers.variance_scaling(scale=initial_mean_factor),
@@ -62,7 +62,7 @@ class PolicyGraph():
             self.sampled_action = tf.squeeze(self.action_normal.sample(1), axis=0)
 
             # Clip action space to min max
-            self.sampled_action = tf.clip_by_value(self.sampled_action, action_min, action_max)
+            self.sampled_action =  self.sampled_action #tf.clip_by_value(self.sampled_action, action_min, action_max)
             
             # Get the log probability of taken actions
             # log π(a_t | s_t; θ)
@@ -128,7 +128,9 @@ class PPO():
         self.policy_loss = tf.reduce_mean(tf.minimum(self.prob_ratio * adv, tf.clip_by_value(self.prob_ratio, 1.0 - epsilon, 1.0 + epsilon) * adv))
 
         # Value loss = mse(V(s_t) - R_t)
-        self.value_loss = tf.reduce_mean(tf.squared_difference(self.policy.value, self.returns)) * value_scale
+        self.value_loss = tf.reduce_mean(tf.squared_difference(tf.reduce_mean(
+                                        self.policy.value, [1,2]
+                                    ), self.returns)) * value_scale
         
         # Entropy loss
         self.entropy_loss = tf.reduce_mean(tf.reduce_sum(self.policy.action_normal.entropy(), axis=-1)) * entropy_scale
@@ -261,7 +263,7 @@ class PPO():
     def predict(self, input_states, greedy=False, write_to_summary=False):
         # Extend input axis 0 if no batch dim
         input_states = np.asarray(input_states)
-        if len(input_states.shape) != 2:
+        if len(input_states.shape) != 4:
             input_states = [input_states]
             
         # Predict action
@@ -278,7 +280,7 @@ class PPO():
 
         # Squeeze output if output has one element
         if len(input_states) == 1:
-            return sampled_action[0], value[0]
+            return sampled_action[0], np.mean(value)
 
         return sampled_action, value
 
