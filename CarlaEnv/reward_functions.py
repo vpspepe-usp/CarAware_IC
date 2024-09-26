@@ -171,18 +171,20 @@ def rw_image(env, action):
         img_prediction = np.argmax(action)
         image_label = env.label
 
-        if img_prediction == 0 and image_label == 0:
-            reward_img = 1
-        elif (img_prediction == 1 and image_label == 2) or (img_prediction == 2 and image_label == 1):
-            reward_img = 1
-        elif (img_prediction == 1 and image_label == 1) or (img_prediction == 2 and image_label == 2):
+        if img_prediction == 0 and image_label == 0: #Real: Nada, Pred: Nada
             reward_img = 10
+        elif (img_prediction == 1 and image_label == 2) or (img_prediction == 2 and image_label == 1):
+            reward_img = 20
+        elif (img_prediction == 1 and image_label == 1) or (img_prediction == 2 and image_label == 2):
+            reward_img = 60
         elif (img_prediction == 1 or img_prediction == 2) and image_label == 0:
-            reward_img = -3
-        elif img_label == 0 and (img_prediction == 1 or img_prediction == 2):
             reward_img = -10
+        elif (image_label == 0) and (img_prediction == 1 or img_prediction == 2):
+            reward_img = -30
         else:
             reward_img = 0
+            
+        reward_img = (reward_img - (60 + (-30))/2)/((60 - (-30))/2)
 
     except:
         return 0

@@ -5,7 +5,9 @@ import reward_functions as reward_functions
 import math
 from wrappers import *
 from ObjectRecognizer.image_label_generator import ImageLabelGenerator
+import cv2
 
+SHOW_IMAGE = True
 class CarlaEnv(gym.Env):
     """
         This is a simple CARLA environment where the goal is to drive in a lap
@@ -114,7 +116,7 @@ class CarlaEnv(gym.Env):
             action_high.extend(act_high)
         '''
         self.objects_labels = {0: 'Nada', 1: 'Semaforo', 2: 'Placa'}
-        self.img_shape = (60, 80, 4,)
+        self.img_shape = (60, 80, 3,)
         self.action_space = gym.spaces.Discrete(3)
         self.action_shape = (3,)
         # 3 possibilidades para cada quadrante da imagem 
@@ -199,18 +201,20 @@ class CarlaEnv(gym.Env):
                 try: # Pode ser que o veículo ainda não tenha coletado imagem, principalmente no inicio
                     self.image = self._simulation.ego_vehicle[0].sens_rgb
                     if self.image != None:
-                        new_matrix, exists_object, np_img = self.image_label_gen.create_label_matrix(self.image)
+                        self.new_matrix, exists_object, self.np_img = self.image_label_gen.create_label_matrix(self.image)
                         break
                 except: # Caso ainda não haja a imagem, preenche tudo com zero
                     time.sleep(1.0)
-                    # _, width, height, fov = self.image_label_gen.get_camera_and_attributes()
-                    # self.image = np.zeros((height, width, 3))
-                    # new_matrix, exists_object = np.zeros((height, width))
-            self.quadrants = self.image_label_gen.create_quadrants_from_matrix(new_matrix)
+            self.quadrants = self.image_label_gen.create_quadrants_from_matrix(self.new_matrix)
             self.quadrants_labels = self.image_label_gen.create_labels_from_quadrants(self.quadrants)
-            self.img_quadrants = self.image_label_gen.create_quadrants_from_matrix(np_img)
+            self.img_quadrants = self.image_label_gen.create_quadrants_from_matrix(self.np_img)
         self.observation = self.img_quadrants[self.quadrant_idx]
         self.label = self.quadrants_labels[self.quadrant_idx]
+        if SHOW_IMAGE:
+            cv2.imshow("Image", self.np_img)
+            cv2.imshow("Labels", self.new_matrix*127)
+            if cv2.waitKey(20) == ord('q'):
+                cv2.destroyAllWindows()
 
 
     def carla_to_network(self, data):  # comprime observação para espaço de -1 a 1

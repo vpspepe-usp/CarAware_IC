@@ -1033,7 +1033,7 @@ class SimulationSetup:
 
             # CONFIGURAÇÃO DA CAMERA RGB
             if self.sens_rgb:
-                if self.rgb_mode == "YOLO":
+                if self.rgb_mode in ["YOLO", "RAW"]:
                     cam_bp = self.world.get_blueprint_library().find('sensor.camera.rgb')
                 else:
                     cam_bp = self.world.get_blueprint_library().find('sensor.camera.semantic_segmentation')

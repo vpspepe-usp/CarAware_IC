@@ -20,7 +20,7 @@ os.startfile("""C:\carla\CarlaUE4_Low""")
 while True:
     try:
         user_entry = input("Press ENTER to start: \n")
-        client = carla.Client('localhost', 2001)
+        client = carla.Client('localhost', 2000)
         client.set_timeout(60)
         world = client.load_world('Town01')
         break
@@ -53,6 +53,9 @@ vehicle = world.try_spawn_actor(vehicle_bp, spawn_points[0])
 # # spawn camera
 camera_bp = bp_lib.find('sensor.camera.rgb')
 camera_init_trans = carla.Transform(carla.Location(z=2))
+camera_bp.set_attribute("image_size_x", str(320))
+camera_bp.set_attribute("image_size_y", str(240))
+camera_bp.set_attribute("fov", str(105))
 camera = world.spawn_actor(camera_bp, camera_init_trans, attach_to=vehicle)
 vehicle.set_autopilot(True)
 
@@ -63,7 +66,7 @@ settings.synchronous_mode = True # Enables synchronous mode
 settings.fixed_delta_seconds = 0.25
 world.apply_settings(settings)
 img_label_gen = ImageLabelGenerator(15, 5)
-img_label_gen.set_camera(camera)
+img_label_gen.set_camera(camera, 320, 240, 105)
 img_label_gen.set_world(world)
 img_dequeue = deque([], maxlen=5)
 camera.listen(img_dequeue.append)
@@ -72,19 +75,19 @@ while True:
     # Retrieve and reshape the image
     world.tick()
     if len(img_dequeue) > 0: 
-        try:
-            new_matrix, exists_object, img = img_label_gen.create_label_matrix(img_dequeue[-1])
-            # img, new_matrix = img_label_gen.get_image_and_create_copy_zeros_matrix()
-            if exists_object:
-                # print(new_matrix)
-                print(img_label_gen.create_labels_from_quadrants(img_label_gen.create_quadrants_from_matrix(new_matrix)))
-                # Image.fromarray(new_matrix*127).show()
-            cv2.imshow("Objects", new_matrix*127)
-            cv2.imshow("Image", img)
-            if cv2.waitKey(20) == ord('q'):
-                break
-        except:
-            print("ERRO")
+        #try:
+        new_matrix, exists_object, img = img_label_gen.create_label_matrix(img_dequeue[-1])
+        # img, new_matrix = img_label_gen.get_image_and_create_copy_zeros_matrix()
+        if exists_object:
+            # print(new_matrix)
+            print(img_label_gen.create_labels_from_quadrants(img_label_gen.create_quadrants_from_matrix(new_matrix)))
+            # Image.fromarray(new_matrix*127).show()
+        cv2.imshow("Objects", new_matrix*127)
+        cv2.imshow("Image", img)
+        if cv2.waitKey(20) == ord('q'):
+            break
+        # except e:
+        #     raise(e)
 cv2.destroyAllWindows()
 
 

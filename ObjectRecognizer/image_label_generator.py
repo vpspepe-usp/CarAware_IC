@@ -19,8 +19,10 @@ class ImageLabelGenerator:
         return objects
     
     def create_zeros_matrix(self, image):
-        np_img = np.reshape(np.copy(image.raw_data), (image.height, image.width, 4))
-        new_matrix = np.zeros((image.height, image.width))
+        if type(image) != np.ndarray:
+            image = self.convert_raw_img_into_ndarray(image)
+        np_img = np.copy(image)
+        new_matrix = np.zeros(image.shape[0:2])
         return np_img, new_matrix
     
     def get_x_y_min_max(self, world_2_camera, verts):
@@ -52,9 +54,9 @@ class ImageLabelGenerator:
         x_max, x_min, y_max, y_min = self.get_x_y_min_max(world_2_camera, verts)
         width = int(x_max) - int(x_min)
         height = int(y_max) - int(y_min)
-        label = self.object_labels_dict.get(str(_object.type), 0)
+        label = int(self.object_labels_dict.get(str(_object.type), 0))
         input_array = np.ones((height, width))*label
-        new_matrix[int(y_min): int(y_max), int(x_min): int(x_max)] = input_array
+        new_matrix[int(y_min): int(y_max), int(x_min): int(x_max)] = label
         return new_matrix
     
     def check_if_object_is_in_front_range(
@@ -124,4 +126,11 @@ class ImageLabelGenerator:
 
     def get_camera_and_attributes(self):
         return self.camera, self.image_w, self.image_h, self.fov
+
+    def convert_raw_img_into_ndarray(self, image):
+        np_image = np.array(image.raw_data)
+        np_image = np_image.reshape((self.image_h, self.image_w, 4))
+        np_image = np_image[:, :, :3]
+        np_image = np.array(np_image)
+        return np_image
         

@@ -22,7 +22,7 @@ from threading import Thread
 #from threading import Timer
 import subprocess
 
-os.environ["CUDA_VISIBLE_DEVICES"]="-1" #disable Tensorflow GPU usage, these simple graphs run faster on CPU
+os.environ["CUDA_VISIBLE_DEVICES"]="0" #-1 disable Tensorflow GPU usage, these simple graphs run faster on CPU
 
 #from agents.navigation.behavior_agent import BehaviorAgent
 #from agents.navigation.basic_agent import BasicAgent
@@ -54,7 +54,7 @@ SIM_PARAMS["RANDOM_MAPS"] = ["Town01"]  # Mapas que serão selecionados randomic
 SIM_PARAMS["GRADUAL_RANDOM_INIT_EP_CHANGE"] = 50  # Número de episódios que irá rodar no início, antes de trocar o mapa
 SIM_PARAMS["GRADUAL_RANDOM_RATE"] = 0  # Tamanho do passo de redução do número de episódios que irá rodar antes de trocar o mapa
 SIM_PARAMS["KALMAN_FILTER"] = False  # Generates kalman filter outputs to compare with the prediction, during "Play" and evaluation in "Training"
-SIM_PARAMS["NUM_EPISODES"] = int(0)  # total de episódios que serão rodados (0 or less trains forever)
+SIM_PARAMS["NUM_EPISODES"] = int(5)  # total de episódios que serão rodados (0 or less trains forever)
 SIM_PARAMS["EGO_VEHICLE_NUM"] = 1 # Número de Ego vehicles gerados na simulação
 SIM_PARAMS["NPC_VEHICLE_NUM"] = 0  # Número de NPC vehicles gerados na simulação
 SIM_PARAMS["STATIC_PROPS_NUM"] = 0  # Número de objetos estáticos que serão inseridos no meio da rua
@@ -87,15 +87,15 @@ SIM_PARAMS["WEATHER_PRESET"] = 2  # 2-Default
 # ============================== CONFIG DO TOP-VIEW ===================================
 SIM_PARAMS["TOP_VIEW_SHOW_HUD"] = True  # Habilita exibição do HUD
 SIM_PARAMS["TOP_VIEW_SHOW_ID"] = True  # Habilita exibição do ID dos objetos no mapa
-SIM_PARAMS["DEBUG"] = True  # Habilita exibição de informações de sensores no HUD (reduz FPS)
+SIM_PARAMS["DEBUG"] = False  # Habilita exibição de informações de sensores no HUD (reduz FPS)
 SIM_PARAMS["SCREEN_WIDTH"] = 1920  # 1920
 SIM_PARAMS["SCREEN_HEIGHT"] = 1020  # 1080
-SIM_PARAMS["CONFIG_FPS"] = 30  # Set this to the FPS of the environment
+SIM_PARAMS["CONFIG_FPS"] = 20  # Set this to the FPS of the environment
 
 # ======================== CONFIG DO REINFORCEMENT LEARNING ===========================
 SIM_PARAMS["TRAIN_MODE"] = "Train"  # Define o modo de execução do RL: "Train", "Play" ou "Simulation"
 SIM_PARAMS["TRAIN_MODEL"] = "Latest"  # "Latest" ou "Nome do modelo" a ser utilizado.
-SIM_PARAMS["TRAIN_RESTART"] = False  # Se True, sobrescreve o modelo criado previamente, em False, continua treinamento
+SIM_PARAMS["TRAIN_RESTART"] = True  # Se True, sobrescreve o modelo criado previamente, em False, continua treinamento
 SIM_PARAMS["PREDICTION_PREVIEW"] = True  # Se True, desenha a previsão na visão Top-view
 SIM_PARAMS["PREDICTION_HUD"] = True  # Se True, insere informações de prediction no HUD
 SIM_PARAMS["LAST_POSITIONS_TRAINING"] = False  # Se True, passa as últimas 4 posições para a rede no treinamento
@@ -116,19 +116,19 @@ HYPER_PARAMS["initial_std"] = float(0.7)  # Initial value of the std used in the
 HYPER_PARAMS["target_std"] = int(0.4)  # Target de desvio padrão, utilizado para finalizar treinamento quando atingido - NÃO ESTÁ FUNCIONANDO
 HYPER_PARAMS["value_scale"] = float(1.0)  # Value loss scale factor
 HYPER_PARAMS["entropy_scale"] = float(0.01)  # Entropy loss scale factor - Default: 0.01
-HYPER_PARAMS["horizon"] = int(128)  # Number of steps to simulate per training step - Default: 128 / 32768 (funcionou)
+HYPER_PARAMS["horizon"] = int(128*4)  # Number of steps to simulate per training step - Default: 128 / 32768 (funcionou)
 HYPER_PARAMS["num_training"] = int(5)  # Number of times the model will be trained per episode
 HYPER_PARAMS["num_epochs"] = int(3)  # Number of PPO training epochs per traning step - Default: 3 (funcionou) / 4
 HYPER_PARAMS["batch_size"] = int(32)  # Epoch batch size - Default: 32 / 2048 (funcionou) / 8192
 HYPER_PARAMS["synchronous"] = False  # Setthis to True when running in a synchronous environment
 HYPER_PARAMS["action_smoothing"] = float(0.0)  #Action smoothing factor
-HYPER_PARAMS["model_name"] = "PPO_MODEL_step10_moving_1agent_reset3_Town02_distnorm_noblackout_highstd_h32768_batch2048_lr8e5_epoch4_v3"  # Name of the model to train. Output written to models/model_name
+HYPER_PARAMS["model_name"] = "PPO_MODEL_step10_moving_1agent_reset3_Town02_distnorm_noblackout_highstd_h32768_batch2048_lr8e5_epoch4_v3_teste"  # Name of the model to train. Output written to models/model_name
 HYPER_PARAMS["reward_fn"] = "rw_image"  # Reward Function to use. See reward_functions.py for more info.
 HYPER_PARAMS["seed"] = 0  # Seed to use. (Note that determinism unfortunately appears to not be guaranteed
                         # with this option in our experience)
-HYPER_PARAMS["eval_interval"] = int(3)  # Number of episodes interval between evaluations - Default: 5
+HYPER_PARAMS["eval_interval"] = int(2)  # Number of episodes interval between evaluations - Default: 5
 #HYPER_PARAMS["save_eval_interval"] = int(10)  # Number of evaluations interval for saving (in addition to best rw)
-HYPER_PARAMS["eval_time"] = int(40)  # Tempo que a simulação irá rodar para avaliação - Default: 60
+HYPER_PARAMS["eval_time"] = int(30)  # Tempo que a simulação irá rodar para avaliação - Default: 60
 HYPER_PARAMS["record_eval"] = True  # If True, save' videos of evaluation episodes to models/model_name/videos/
 # HYPER_PARAMS["reset_mode"] = RESET_MODE  5# Usado em conjunto com restart, define se reinicia sempre ou só target
 
@@ -169,15 +169,15 @@ SENS_PARAMS["SENS_IMU_BLACKOUT_INTERVAL_MIN"] = 5  # Tempo em segundos do interv
 SENS_PARAMS["SENS_IMU_BLACKOUT_INTERVAL_MAX"] = 10
 
 # COLLISION DETECTION (COL)  # Resets the episode if there is a collision and the vehicle stops
-SENS_PARAMS["SENS_COL"] = False
+SENS_PARAMS["SENS_COL"] = True
 
 # OBSTACLE DETECTION (OBS)
 SENS_PARAMS["SENS_OBS"] = False
 
 # CAMERA DE VÍDEO A CORES (RGB)
 SENS_PARAMS["SENS_RGB"] = True
-SENS_PARAMS["SENS_RGB_PREVIEW"] = False  # Define se as imagens captadas serão desenhadas na tela
-SENS_PARAMS["SENS_RGB_SAMPLING"] = 3  # tempo em segundos entre cada aquisição
+SENS_PARAMS["SENS_RGB_PREVIEW"] = True  # Define se as imagens captadas serão desenhadas na tela
+SENS_PARAMS["SENS_RGB_SAMPLING"] = 0.06  # tempo em segundos entre cada aquisição
 SENS_PARAMS["SENS_RGB_STACK_SIZE"] = 4  # define o tamanho do buffer com X imagens para alimentar a RN
 SENS_PARAMS["RGB_MODE"] = "RAW"  # Valores possíveis: YOLO, BINARY, SEMANTIC, RAW
 SENS_PARAMS["IM_WIDTH"] = 320  # 640   160
